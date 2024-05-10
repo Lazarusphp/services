@@ -1,0 +1,42 @@
+version: "3.9"
+volumes:
+  Hosting:
+    external: true
+networks:
+  web:
+    external: true
+  backend:
+    external: true
+services:
+  web:
+    image: ${WEB}
+    hostname: ${domain}
+    container_name: ${site_name}-web
+    networks:
+      - web
+      - backend
+    depends_on:
+      - php-fpm
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${site_name}_web.rule=Host(`${domain}`)"
+      - "traefik.http.routers.${site_name}_web.entrypoints=web"
+      - "traefik.http.routers.${site_name}_websecure.rule=Host(`${domain}`)"
+      - "traefik.http.routers.${site_name}_websecure.entrypoints=websecure"
+      - "traefik.http.routers.${site_name}_websecure.tls.certresolver=myresolver"
+      - "traefik.docker.network=web"
+    volumes:
+      - Hosting:/var/www/
+      - ./conf.d:/etc/nginx/conf.d
+    restart: always
+  php-fpm:
+    image: ${PHP}
+    ports:
+     - 9000:9000
+    networks:
+      - web
+      - backend
+    container_name: "${site_name}-php"
+    volumes:
+      - Hosting:/var/www
+    restart: always

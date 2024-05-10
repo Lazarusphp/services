@@ -1,0 +1,37 @@
+version: "3.9"
+volumes:
+  Hosting:
+    external: true
+networks:
+  web:
+    external: true
+  backend:
+    external: true
+services:
+  web:
+    image: ${WEB}
+    hostname: ${domain}
+    container_name: ${site_name}-web
+    networks:
+      - web
+      - backend
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - php-fpm
+    volumes:
+      - Hosting:/var/www/
+      - ./conf.d:/etc/nginx/conf.d
+    restart: always
+  php-fpm:
+    image: ${PHP}
+    ports:
+     - 9000:9000
+    networks:
+      - web
+      - backend
+    container_name: "${site_name}-php"
+    volumes:
+      - Hosting:/var/www
+    restart: always

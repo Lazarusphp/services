@@ -1,0 +1,30 @@
+version: '3.9'
+networks:
+  backend:
+    external: true
+services:
+  db:
+    image: mysql:8.0.30
+    ports:
+      - 3306:3306
+    networks:
+      - backend
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${DBNAME}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: always
+    container_name: db
+    hostname: db
+  adminer:
+    image: adminer
+    networks:
+      - backend
+    restart: always
+    container_name: adminer
+    ports:
+      - 8080:8080
+volumes:
+  mysql_data:
+    external: true
